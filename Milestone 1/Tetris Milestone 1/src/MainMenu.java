@@ -55,15 +55,14 @@ public class MainMenu extends JPanel {
         playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Code to start the game
-                JOptionPane.showMessageDialog(frame, "Play button pressed");
+                frame.setContentPane(new GameScreen(frame, MainMenu.this));
+                frame.revalidate();
             }
         });
 
         configButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Show configuration screen
                 frame.setContentPane(new ConfigScreen(frame, MainMenu.this));
                 frame.revalidate();
             }
@@ -72,7 +71,6 @@ public class MainMenu extends JPanel {
         highScoresButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Show high score screen
                 frame.setContentPane(new HighScoreScreen(frame, MainMenu.this));
                 frame.revalidate();
             }
@@ -81,7 +79,6 @@ public class MainMenu extends JPanel {
         exitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Code to exit the application
                 System.exit(0);
             }
         });
