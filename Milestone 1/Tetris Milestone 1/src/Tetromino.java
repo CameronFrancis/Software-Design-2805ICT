@@ -49,15 +49,16 @@ public class Tetromino {
     }
 
     public void rotate() {
-        int size = shape.length;
-        int[][] newShape = new int[size][size];
-
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                newShape[j][size - 1 - i] = shape[i][j];
+        int rows = shape.length;
+        int cols = shape[0].length;
+        int[][] newShape = new int[cols][rows]; // Swap rows and columns for rotation
+    
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                newShape[j][rows - 1 - i] = shape[i][j];
             }
         }
-
+    
         shape = newShape;
     }
 }

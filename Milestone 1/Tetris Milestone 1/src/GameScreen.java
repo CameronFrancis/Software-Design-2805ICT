@@ -64,13 +64,14 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             int[][] shape = tetromino.getShape();
             int x = tetromino.getX();
             int y = tetromino.getY();
-            g.setColor(tetromino.getColor());
+            g.setColor(tetromino.getColor()); // Set the color once for the tetromino
             for (int i = 0; i < shape.length; i++) {
                 for (int j = 0; j < shape[i].length; j++) {
                     if (shape[i][j] != 0) {
                         g.fillRect((x + j) * 30, (y + i) * 30, 30, 30);
                         g.setColor(Color.BLACK);
                         g.drawRect((x + j) * 30, (y + i) * 30, 30, 30);
+                        g.setColor(tetromino.getColor()); // Reset color to tetromino color
                     }
                 }
             }
