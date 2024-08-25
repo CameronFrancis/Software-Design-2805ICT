@@ -113,7 +113,7 @@ public class ConfigScreen extends JPanel {
             }
         });
 
-        JLabel authorLabel = new JLabel("Author: Your Name", JLabel.CENTER);
+        JLabel authorLabel = new JLabel(GameConfig.AUTHOR, JLabel.CENTER);
         authorLabel.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
         gbc.gridy = 9;
         gbc.gridwidth = 2;

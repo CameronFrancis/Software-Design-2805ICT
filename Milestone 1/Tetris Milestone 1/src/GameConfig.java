@@ -8,4 +8,5 @@ public class GameConfig {
     // Other Settings
     public static final int TIMER_DELAY = 500; // Splash delay
     public static final String GAME_TITLE = "Enhanced Tetris"; // Game title
+    public static final String AUTHOR = "Cameron Francis";
 }
