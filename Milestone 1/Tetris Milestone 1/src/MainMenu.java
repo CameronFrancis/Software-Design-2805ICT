@@ -52,12 +52,12 @@ public class MainMenu extends JPanel {
         add(authorLabel, gbc);
 
         // Add action listeners to buttons
-        playButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setContentPane(new GameScreen(frame, MainMenu.this));
-                frame.revalidate();
-            }
+        playButton.addActionListener(e -> {
+            GameScreen gameScreen = new GameScreen(frame, MainMenu.this);
+            frame.setContentPane(gameScreen);
+            frame.pack(); 
+            frame.revalidate();
+            gameScreen.requestFocusInWindow(); 
         });
 
         configButton.addActionListener(new ActionListener() {

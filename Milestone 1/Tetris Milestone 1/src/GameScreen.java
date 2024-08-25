@@ -23,10 +23,16 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
     public GameScreen(JFrame frame, MainMenu mainMenu) {
         this.frame = frame;
         this.mainMenu = mainMenu;
-        this.gameBoard = new GameBoard(20, 10);
-        this.timer = new Timer(500, this);
+        this.gameBoard = new GameBoard(GameConfig.BOARD_HEIGHT, GameConfig.BOARD_WIDTH);
+        this.timer = new Timer(GameConfig.TIMER_DELAY, this);
         this.isPaused = false;
 
+        // Set the preferred size to match the game board size
+        setPreferredSize(new Dimension(
+            GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE,
+            GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE
+        ));
+        
         setFocusable(true);
         addKeyListener(this);
         timer.start();
@@ -64,14 +70,14 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             int[][] shape = tetromino.getShape();
             int x = tetromino.getX();
             int y = tetromino.getY();
-            g.setColor(tetromino.getColor()); // Set the color once for the tetromino
+            g.setColor(tetromino.getColor()); 
             for (int i = 0; i < shape.length; i++) {
                 for (int j = 0; j < shape[i].length; j++) {
                     if (shape[i][j] != 0) {
                         g.fillRect((x + j) * 30, (y + i) * 30, 30, 30);
                         g.setColor(Color.BLACK);
                         g.drawRect((x + j) * 30, (y + i) * 30, 30, 30);
-                        g.setColor(tetromino.getColor()); // Reset color to tetromino color
+                        g.setColor(tetromino.getColor()); 
                     }
                 }
             }

@@ -7,26 +7,26 @@ public class MainApp {
         SplashScreen splash = new SplashScreen(5000, 450, 300);
         splash.showSplash();
 
-        // After the splash screen, show the main application window
+        // After 5 seconds show splash
         SwingUtilities.invokeLater(() -> {
-            JFrame mainFrame = new JFrame("Enhanced Tetris");
+            JFrame mainFrame = new JFrame(GameConfig.GAME_TITLE);
             mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            // Initialize the game screen
-            GameScreen gameScreen = new GameScreen(mainFrame, new MainMenu(mainFrame));
-            int cellSize = 30;
-            int boardWidth = 10;  // Number of columns
-            int boardHeight = 20; // Number of rows
+            // Initialise main menu
+            MainMenu mainMenu = new MainMenu(mainFrame);
 
-            // Set the preferred size based on the game board size
-            gameScreen.setPreferredSize(new Dimension(boardWidth * cellSize, boardHeight * cellSize));
+            // set up size of mainmenu frame
+            mainMenu.setPreferredSize(new Dimension(
+                GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE, 
+                GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE
+            ));
 
-            // Add the game screen or main menu panel to the main frame
-            mainFrame.setContentPane(gameScreen); // or new MainMenu(mainFrame)
+            // Set the content pane to main menu
+            mainFrame.setContentPane(mainMenu);
 
-            // Use pack() to adjust window size to fit the preferred size of GameScreen
+            // Use pack() to size the frame to match the content
             mainFrame.pack();
-            mainFrame.setLocationRelativeTo(null); // Center the window on the screen
+            mainFrame.setLocationRelativeTo(null); // Center the frame on the screen
 
             mainFrame.setVisible(true);
         });
