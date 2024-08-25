@@ -32,7 +32,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE,
             GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE
         ));
-        
+
         setFocusable(true);
         addKeyListener(this);
         timer.start();
@@ -129,45 +129,49 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        Tetromino tetromino = gameBoard.getCurrentTetromino();
-        if (tetromino != null && !isPaused) {
-            switch (e.getKeyCode()) {
-                case KeyEvent.VK_LEFT:
-                    if (gameBoard.canMove(tetromino, tetromino.getX() - 1, tetromino.getY())) {
-                        tetromino.moveLeft();
-                    }
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    if (gameBoard.canMove(tetromino, tetromino.getX() + 1, tetromino.getY())) {
-                        tetromino.moveRight();
-                    }
-                    break;
-                case KeyEvent.VK_DOWN:
-                    if (gameBoard.canMove(tetromino, tetromino.getX(), tetromino.getY() + 1)) {
-                        tetromino.moveDown();
-                    }
-                    break;
-                case KeyEvent.VK_UP:
-                    tetromino.rotate();
-                    if (!gameBoard.canMove(tetromino, tetromino.getX(), tetromino.getY())) {
-                        tetromino.rotate();
-                        tetromino.rotate();
-                        tetromino.rotate();
-                    }
-                    break;
-                case KeyEvent.VK_P:
-                    isPaused = !isPaused;
-                    if (isPaused) {
-                        timer.stop();
-                        JOptionPane.showMessageDialog(this, "Game is paused, press P to continue.");
-                    } else {
-                        timer.start();
-                    }
-                    break;
-            }
-            repaint();
-        }
+    Tetromino tetromino = gameBoard.getCurrentTetromino();
+    if (e.getKeyCode() == KeyEvent.VK_P) {
+        togglePause(); // Use a separate method to toggle pause
     }
+
+    if (tetromino != null && !isPaused) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_LEFT:
+                if (gameBoard.canMove(tetromino, tetromino.getX() - 1, tetromino.getY())) {
+                    tetromino.moveLeft();
+                }
+                break;
+            case KeyEvent.VK_RIGHT:
+                if (gameBoard.canMove(tetromino, tetromino.getX() + 1, tetromino.getY())) {
+                    tetromino.moveRight();
+                }
+                break;
+            case KeyEvent.VK_DOWN:
+                if (gameBoard.canMove(tetromino, tetromino.getX(), tetromino.getY() + 1)) {
+                    tetromino.moveDown();
+                }
+                break;
+            case KeyEvent.VK_UP:
+                tetromino.rotate();
+                if (!gameBoard.canMove(tetromino, tetromino.getX(), tetromino.getY())) {
+                    tetromino.rotate();
+                    tetromino.rotate();
+                    tetromino.rotate();
+                }
+                break;
+        }
+        repaint();
+    }
+}
+private void togglePause() {
+    isPaused = !isPaused;
+    if (isPaused) {
+        timer.stop();
+        JOptionPane.showMessageDialog(this, "Game is paused, press P to continue.");
+    } else {
+        timer.start();
+    }
+}
 
     @Override
     public void keyReleased(KeyEvent e) {}
