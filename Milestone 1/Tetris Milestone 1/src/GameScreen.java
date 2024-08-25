@@ -34,7 +34,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
 
         int buttonHeight = 50;
 
-        // Set the preferred size to match the game board size
+        
         setPreferredSize(new Dimension(
             GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE,
             GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE + buttonHeight

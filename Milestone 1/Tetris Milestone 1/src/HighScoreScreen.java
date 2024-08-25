@@ -48,10 +48,13 @@ public class HighScoreScreen extends JPanel {
 
         JTable table = new JTable(data, columnNames);
         table.setFillsViewportHeight(true);
+        
         JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setPreferredSize(new Dimension(250, 300)); // Adjust the size as needed
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.BOTH; // Allow the table to expand
         add(scrollPane, gbc);
 
         // Back Button
@@ -59,6 +62,7 @@ public class HighScoreScreen extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         add(backButton, gbc);
 
         backButton.addActionListener(new ActionListener() {
@@ -66,13 +70,19 @@ public class HighScoreScreen extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 frame.setContentPane(mainMenu);
                 frame.revalidate();
+                frame.pack();
             }
         });
 
-        JLabel authorLabel = new JLabel("Author: Your Name", JLabel.CENTER);
+        JLabel authorLabel = new JLabel(GameConfig.AUTHOR, JLabel.CENTER);
         authorLabel.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
         gbc.gridy = 3;
         gbc.gridwidth = 2;
         add(authorLabel, gbc);
+
+        setPreferredSize(new Dimension(300, 450)); 
+
+        frame.pack();
+        frame.setLocationRelativeTo(null); 
     }
 }
