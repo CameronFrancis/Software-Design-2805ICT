@@ -20,7 +20,7 @@ public class SplashScreen extends JWindow {
         ImageIcon originalIcon = new ImageIcon(getClass().getResource("/resources/splash.png"));
         Image originalImage = originalIcon.getImage();
 
-        // Calculate the new dimensions maintaining the aspect ratio
+        // Calculate the dimensions maintaining the aspect ratio
         int originalWidth = originalIcon.getIconWidth();
         int originalHeight = originalIcon.getIconHeight();
         float aspectRatio = (float) originalWidth / originalHeight;

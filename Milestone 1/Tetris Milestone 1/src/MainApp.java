@@ -24,7 +24,7 @@ public class MainApp {
             // Set the content pane to main menu
             mainFrame.setContentPane(mainMenu);
 
-            // Use pack() to size the frame to match the content
+            // pack() to size the frame to match the content
             mainFrame.pack();
             mainFrame.setLocationRelativeTo(null); // Center the frame on the screen
 

@@ -14,7 +14,7 @@ public class ConfigScreen extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.CENTER; // Center-align components
+        gbc.anchor = GridBagConstraints.CENTER; // Center-align
 
         JLabel titleLabel = new JLabel("Configuration", JLabel.CENTER);
         titleLabel.setFont(new Font("Sans-Serif", Font.BOLD, 24));

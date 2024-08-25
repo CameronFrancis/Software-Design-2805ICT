@@ -160,7 +160,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
     public void keyPressed(KeyEvent e) {
     Tetromino tetromino = gameBoard.getCurrentTetromino();
     if (e.getKeyCode() == KeyEvent.VK_P) {
-        togglePause(); // Use a separate method to toggle pause
+        togglePause();
     }
 
     if (tetromino != null && !isPaused) {
