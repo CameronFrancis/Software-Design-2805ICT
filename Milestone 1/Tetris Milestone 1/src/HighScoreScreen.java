@@ -60,9 +60,9 @@ public class HighScoreScreen extends JPanel {
         // Back Button
         JButton backButton = new JButton("Back");
         gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridy = 11;
+        gbc.gridwidth = 2; 
+        gbc.fill = GridBagConstraints.NONE;
         add(backButton, gbc);
 
         backButton.addActionListener(new ActionListener() {

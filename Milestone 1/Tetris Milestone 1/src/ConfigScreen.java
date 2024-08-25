@@ -14,6 +14,7 @@ public class ConfigScreen extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER; // Center-align components
 
         JLabel titleLabel = new JLabel("Configuration", JLabel.CENTER);
         titleLabel.setFont(new Font("Sans-Serif", Font.BOLD, 24));
@@ -24,46 +25,51 @@ public class ConfigScreen extends JPanel {
 
         // Field Width
         JLabel fieldWidthLabel = new JLabel("Field Width (No of cells):");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2; 
+        add(fieldWidthLabel, gbc);
+
         JSlider fieldWidthSlider = new JSlider(5, 15, 10);
         fieldWidthSlider.setMajorTickSpacing(1);
         fieldWidthSlider.setPaintTicks(true);
         fieldWidthSlider.setPaintLabels(true);
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        add(fieldWidthLabel, gbc);
-        gbc.gridx = 1;
+        gbc.gridy = 2; 
         add(fieldWidthSlider, gbc);
 
         // Field Height
         JLabel fieldHeightLabel = new JLabel("Field Height (No of cells):");
+        gbc.gridy = 3;
+        add(fieldHeightLabel, gbc);
+
         JSlider fieldHeightSlider = new JSlider(15, 30, 20);
-        fieldHeightSlider.setMajorTickSpacing(1);
+        fieldHeightSlider.setMajorTickSpacing(5); 
+        fieldHeightSlider.setMinorTickSpacing(1);
         fieldHeightSlider.setPaintTicks(true);
         fieldHeightSlider.setPaintLabels(true);
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        add(fieldHeightLabel, gbc);
-        gbc.gridx = 1;
+
+        gbc.gridy = 4; 
         add(fieldHeightSlider, gbc);
 
         // Game Level
         JLabel gameLevelLabel = new JLabel("Game Level:");
+        gbc.gridy = 5;
+        add(gameLevelLabel, gbc);
+
         JSlider gameLevelSlider = new JSlider(1, 10, 1);
         gameLevelSlider.setMajorTickSpacing(1);
         gameLevelSlider.setPaintTicks(true);
         gameLevelSlider.setPaintLabels(true);
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        add(gameLevelLabel, gbc);
-        gbc.gridx = 1;
+        gbc.gridy = 6; // Move to the next row
         add(gameLevelSlider, gbc);
 
         // Music On/Off
         JCheckBox musicCheckbox = new JCheckBox("Music (On/Off):", true);
         JLabel musicLabel = new JLabel("On");
         musicCheckbox.addActionListener(e -> musicLabel.setText(musicCheckbox.isSelected() ? "On" : "Off"));
+        gbc.gridy = 7;
+        gbc.gridwidth = 1;
         gbc.gridx = 0;
-        gbc.gridy = 4;
         add(musicCheckbox, gbc);
         gbc.gridx = 1;
         add(musicLabel, gbc);
@@ -72,8 +78,8 @@ public class ConfigScreen extends JPanel {
         JCheckBox soundEffectCheckbox = new JCheckBox("Sound Effect (On/Off):", true);
         JLabel soundEffectLabel = new JLabel("On");
         soundEffectCheckbox.addActionListener(e -> soundEffectLabel.setText(soundEffectCheckbox.isSelected() ? "On" : "Off"));
+        gbc.gridy = 8;
         gbc.gridx = 0;
-        gbc.gridy = 5;
         add(soundEffectCheckbox, gbc);
         gbc.gridx = 1;
         add(soundEffectLabel, gbc);
@@ -82,8 +88,8 @@ public class ConfigScreen extends JPanel {
         JCheckBox aiPlayCheckbox = new JCheckBox("AI Play (On/Off):");
         JLabel aiPlayLabel = new JLabel("Off");
         aiPlayCheckbox.addActionListener(e -> aiPlayLabel.setText(aiPlayCheckbox.isSelected() ? "On" : "Off"));
+        gbc.gridy = 9;
         gbc.gridx = 0;
-        gbc.gridy = 6;
         add(aiPlayCheckbox, gbc);
         gbc.gridx = 1;
         add(aiPlayLabel, gbc);
@@ -92,8 +98,8 @@ public class ConfigScreen extends JPanel {
         JCheckBox extendModeCheckbox = new JCheckBox("Extend Mode (On/Off):");
         JLabel extendModeLabel = new JLabel("Off");
         extendModeCheckbox.addActionListener(e -> extendModeLabel.setText(extendModeCheckbox.isSelected() ? "On" : "Off"));
+        gbc.gridy = 10;
         gbc.gridx = 0;
-        gbc.gridy = 7;
         add(extendModeCheckbox, gbc);
         gbc.gridx = 1;
         add(extendModeLabel, gbc);
@@ -101,21 +107,20 @@ public class ConfigScreen extends JPanel {
         // Back Button
         JButton backButton = new JButton("Back");
         gbc.gridx = 0;
-        gbc.gridy = 8;
-        gbc.gridwidth = 2;
+        gbc.gridy = 11;
+        gbc.gridwidth = 2; 
+        gbc.fill = GridBagConstraints.NONE;
         add(backButton, gbc);
 
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setContentPane(mainMenu);
-                frame.revalidate();
-            }
+        backButton.addActionListener(e -> {
+            frame.setContentPane(mainMenu);
+            frame.revalidate();
+            frame.pack(); 
         });
 
         JLabel authorLabel = new JLabel(GameConfig.AUTHOR, JLabel.CENTER);
         authorLabel.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
-        gbc.gridy = 9;
+        gbc.gridy = 12;
         gbc.gridwidth = 2;
         add(authorLabel, gbc);
     }
