@@ -44,7 +44,7 @@ public class MainMenu extends JPanel {
         gbc.gridwidth = 2;
         add(exitButton, gbc);
 
-        JLabel authorLabel = new JLabel("Author: Your Name", JLabel.CENTER);
+        JLabel authorLabel = new JLabel("Author: Cameron Francis", JLabel.CENTER);
         authorLabel.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
         gbc.gridx = 0;
         gbc.gridy = 5;
