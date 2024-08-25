@@ -1,6 +1,8 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -28,17 +30,38 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         this.timer = new Timer(GameConfig.TIMER_DELAY, this);
         this.isPaused = false;
 
+        setLayout(new BorderLayout());
+
+        int buttonHeight = 50;
+
         // Set the preferred size to match the game board size
         setPreferredSize(new Dimension(
             GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE,
-            GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE
+            GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE + buttonHeight
         ));
 
         setFocusable(true);
         addKeyListener(this);
+
+        JPanel gameBoardPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                drawGameBoard(g);
+            }
+        };
+        gameBoardPanel.setPreferredSize(new Dimension(
+            GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE,
+            GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE
+        ));
+        add(gameBoardPanel, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton endGameButton = new JButton("End Game");
         endGameButton.addActionListener(e -> stopGame());
-        add(endGameButton);
+        buttonPanel.add(endGameButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
 
 
         timer.start();
