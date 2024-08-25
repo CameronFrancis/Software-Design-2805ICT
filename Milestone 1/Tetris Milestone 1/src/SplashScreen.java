@@ -37,7 +37,7 @@ public class SplashScreen extends JWindow {
         Image scaledImage = originalImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
-        // Set the window's bounds, centering the window
+        // Set the window dimensions and center
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screen.width - newWidth) / 2;
         int y = (screen.height - newHeight) / 2;
@@ -55,7 +55,7 @@ public class SplashScreen extends JWindow {
         // Display it
         setVisible(true);
 
-        // Wait a little while, maybe showing a progress bar
+        // Wait time
         try {
             Thread.sleep(duration);
         } catch (Exception e) {
@@ -70,7 +70,6 @@ public class SplashScreen extends JWindow {
     }
 
     public static void main(String[] args) {
-        // Show the splash screen with a max width and height
         SplashScreen splash = new SplashScreen(5000, 450, 300);
         splash.showSplashAndExit();
     }
