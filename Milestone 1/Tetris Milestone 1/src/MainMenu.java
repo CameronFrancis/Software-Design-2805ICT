@@ -2,9 +2,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.sound.sampled.*;
+import java.io.File;
 
 public class MainMenu extends JPanel {
     private JFrame frame;
+    private Clip backgroundMusic;
 
     public MainMenu(JFrame frame) {
         this.frame = frame;
@@ -12,75 +15,93 @@ public class MainMenu extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-
+        
         JLabel titleLabel = new JLabel("Main Menu", JLabel.CENTER);
         titleLabel.setFont(new Font("Sans-Serif", Font.BOLD, 24));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         add(titleLabel, gbc);
-
+        
         JButton playButton = new JButton("Play");
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
         add(playButton, gbc);
-
+        
         JButton configButton = new JButton("Configuration");
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 2;
         add(configButton, gbc);
-
+        
         JButton highScoresButton = new JButton("High Scores");
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
         add(highScoresButton, gbc);
-
+        
         JButton exitButton = new JButton("Exit");
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.gridwidth = 2;
         add(exitButton, gbc);
-
+        
         JLabel authorLabel = new JLabel(GameConfig.AUTHOR, JLabel.CENTER);
         authorLabel.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
         add(authorLabel, gbc);
-
+        
         // Add action listeners to buttons
         playButton.addActionListener(e -> {
             GameScreen gameScreen = new GameScreen(frame, MainMenu.this);
             frame.setContentPane(gameScreen);
-            frame.pack(); 
+            frame.pack();
             frame.revalidate();
-            gameScreen.requestFocusInWindow(); 
+            gameScreen.requestFocusInWindow();
         });
+        
+        configButton.addActionListener(e -> {
+            frame.setContentPane(new ConfigScreen(frame, MainMenu.this));
+            frame.revalidate();
+        });
+        
+        highScoresButton.addActionListener(e -> {
+            frame.setContentPane(new HighScoreScreen(frame, MainMenu.this));
+            frame.revalidate();
+        });
+        
+        exitButton.addActionListener(e -> System.exit(0));
+        
+        // Load background music
+        loadBackgroundMusic();
+    }
 
-        configButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setContentPane(new ConfigScreen(frame, MainMenu.this));
-                frame.revalidate();
+    private void loadBackgroundMusic() {
+        try {
+            File musicPath = new File("src/resources/background.wav");
+            if (musicPath.exists()) {
+                AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
+                backgroundMusic = AudioSystem.getClip();
+                backgroundMusic.open(audioInput);
+                backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY);
+            } else {
+                System.out.println("Background music file not found!");
             }
-        });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
-        highScoresButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setContentPane(new HighScoreScreen(frame, MainMenu.this));
-                frame.revalidate();
+    private void toggleMusic() {
+        if (backgroundMusic != null) {
+            if (backgroundMusic.isRunning()) {
+                backgroundMusic.stop();
+            } else {
+                backgroundMusic.start();
             }
-        });
-
-        exitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
+        }
     }
 }
