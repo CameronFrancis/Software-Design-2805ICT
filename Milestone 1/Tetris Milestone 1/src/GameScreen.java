@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -55,18 +56,24 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         setFocusable(true);
         addKeyListener(this);
 
-        // Add game board panel to the center
+        // Setting up the game board panel and its border
         JPanel gameBoardPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                drawGameBoard(g);
+                int offsetX = (getWidth() - GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE) / 2;
+                int offsetY = (getHeight() - GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE) / 2;
+                drawGameBoard(g, offsetX, offsetY);
+                // Draw border around the actual game board
+                g.setColor(Color.BLACK);
+                g.drawRect(offsetX, offsetY, GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE, GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE);
             }
         };
         gameBoardPanel.setPreferredSize(new Dimension(
             GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE,
             GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE
         ));
+        gameBoardPanel.setLayout(new GridBagLayout()); // Center the game board
         add(gameBoardPanel, BorderLayout.CENTER);
 
         // Add game info panel to the left
@@ -132,22 +139,21 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        drawGameBoard(g);
     }
 
-    private void drawGameBoard(Graphics g) {
+    private void drawGameBoard(Graphics g, int offsetX, int offsetY) {
         Color[][] board = gameBoard.getBoard();
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 if (board[i][j] != null) {
                     g.setColor(board[i][j]);
-                    g.fillRect(j * 30, i * 30, 30, 30);
+                    g.fillRect(offsetX + j * GameConfig.CELL_SIZE, offsetY + i * GameConfig.CELL_SIZE, GameConfig.CELL_SIZE, GameConfig.CELL_SIZE);
                     g.setColor(Color.BLACK);
-                    g.drawRect(j * 30, i * 30, 30, 30);
+                    g.drawRect(offsetX + j * GameConfig.CELL_SIZE, offsetY + i * GameConfig.CELL_SIZE, GameConfig.CELL_SIZE, GameConfig.CELL_SIZE);
                 }
             }
         }
-
+    
         Tetromino tetromino = gameBoard.getCurrentTetromino();
         if (tetromino != null) {
             int[][] shape = tetromino.getShape();
@@ -157,9 +163,9 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             for (int i = 0; i < shape.length; i++) {
                 for (int j = 0; j < shape[i].length; j++) {
                     if (shape[i][j] != 0) {
-                        g.fillRect((x + j) * 30, (y + i) * 30, 30, 30);
+                        g.fillRect(offsetX + (x + j) * GameConfig.CELL_SIZE, offsetY + (y + i) * GameConfig.CELL_SIZE, GameConfig.CELL_SIZE, GameConfig.CELL_SIZE);
                         g.setColor(Color.BLACK);
-                        g.drawRect((x + j) * 30, (y + i) * 30, 30, 30);
+                        g.drawRect(offsetX + (x + j) * GameConfig.CELL_SIZE, offsetY + (y + i) * GameConfig.CELL_SIZE, GameConfig.CELL_SIZE, GameConfig.CELL_SIZE);
                         g.setColor(tetromino.getColor());
                     }
                 }
