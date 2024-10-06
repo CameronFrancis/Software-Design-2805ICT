@@ -9,7 +9,7 @@ public class GameConfig {
     public static final int TIMER_DELAY = 500; // Splash delay
     public static final String GAME_TITLE = "Enhanced Tetris"; // Game title
     public static final String AUTHOR = "Cameron Francis";
-
+    public static final String HIGH_SCORE_FILE_PATH = "/resources/high_scores.json";
     // Configurable Settings
     public static int INITIAL_LEVEL = 1;
     public static String PLAYER_TYPE = "Human";

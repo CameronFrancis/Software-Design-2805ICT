@@ -10,14 +10,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Date;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
 
 public class GameScreen extends JPanel implements KeyListener, ActionListener {
     private JFrame frame;
@@ -190,11 +191,16 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
                     timer.stop();
                     AudioManager.playGameFinishSound();
                     JOptionPane.showMessageDialog(this, "Game Over");
+                
+                    // Prompt to save high score
+                    promptToSaveHighScore();
+                
                     AudioManager.stopBackgroundMusic();
                     frame.setContentPane(mainMenu);
                     frame.revalidate();
                     return;
                 }
+                
                 gameBoard.setCurrentTetromino(generateNewTetromino());
             }
         } else {
@@ -317,15 +323,32 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
     public void keyTyped(KeyEvent e) {}
 
     public void stopGame() {
-        timer.stop();
-        AudioManager.stopBackgroundMusic(); // Stop background music
-        int response = JOptionPane.showConfirmDialog(this, "Are you sure to stop the current game?", "Stop Game", JOptionPane.YES_NO_OPTION);
+        // Confirm if the user really wants to exit the game
+        int response = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit the game?", "Exit Game", JOptionPane.YES_NO_OPTION);
         if (response == JOptionPane.YES_OPTION) {
+            timer.stop();
+            AudioManager.stopBackgroundMusic(); // Stop background music
+    
+            // Prompt the user to save their high score
+            promptToSaveHighScore();
+    
+            // Return to the main menu
             frame.setContentPane(mainMenu);
             frame.revalidate();
         } else {
+            // If the user doesn't want to exit, resume the game
             timer.start();
-            AudioManager.playBackgroundMusic(); // Resume background music if not stopping
+            AudioManager.playBackgroundMusic(); // Resume background music
+        }
+    }
+    private void promptToSaveHighScore() {
+        String playerName = JOptionPane.showInputDialog(this, "Enter your name to save your score:");
+        if (playerName != null && !playerName.trim().isEmpty()) {
+            HighScoreManager highScoreManager = new HighScoreManager();
+            HighScoreManager.HighScore highScore = new HighScoreManager.HighScore(playerName, score, new Date());
+            highScoreManager.addHighScore(highScore);
+            highScoreManager.saveHighScores();
+            JOptionPane.showMessageDialog(this, "Your score has been saved!");
         }
     }
 }
