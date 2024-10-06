@@ -1,8 +1,10 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -26,7 +28,9 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
     private int score;
     private JLabel levelLabel;
     private JLabel scoreLabel;
-    
+    private JLabel linesClearedLabel;
+    private JLabel nextTetrominoLabel;
+
     public static final Color PURPLE = new Color(128, 0, 128);
 
     public GameScreen(JFrame frame, MainMenu mainMenu) {
@@ -42,12 +46,11 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         this.timer = new Timer(GameConfig.TIMER_DELAY, this);
 
         setLayout(new BorderLayout());
-        int buttonHeight = 50;
 
         // Set the preferred size of the game screen
         setPreferredSize(new Dimension(
-            GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE,
-            GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE + buttonHeight
+            GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE + 300, // Additional space for info panel
+            GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE + 100 // Additional space for button panel
         ));
         setFocusable(true);
         addKeyListener(this);
@@ -66,12 +69,42 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         ));
         add(gameBoardPanel, BorderLayout.CENTER);
 
-        // Add status panel (for level, score, etc.) at the top
-        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        levelLabel = new JLabel("Level: " + currentLevel);
+        // Add game info panel to the left
+        JPanel gameInfoPanel = new JPanel(new GridBagLayout());
+        gameInfoPanel.setPreferredSize(new Dimension(200, GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE));
+        gameInfoPanel.setBackground(Color.LIGHT_GRAY);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = new java.awt.Insets(5, 5, 5, 5);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        // Add game info labels to the info panel
+        gameInfoPanel.add(new JLabel("Game Info (Player 1)"), gbc);
+        gbc.gridy++;
+        gameInfoPanel.add(new JLabel("Player Type: AI"), gbc);
+        gbc.gridy++;
+        gameInfoPanel.add(new JLabel("Initial Level: " + currentLevel), gbc);
+        gbc.gridy++;
+        levelLabel = new JLabel("Current Level: " + currentLevel);
+        gameInfoPanel.add(levelLabel, gbc);
+        gbc.gridy++;
+        linesClearedLabel = new JLabel("Line Erased: " + rowsCleared);
+        gameInfoPanel.add(linesClearedLabel, gbc);
+        gbc.gridy++;
         scoreLabel = new JLabel("Score: " + score);
-        statusPanel.add(levelLabel);
-        statusPanel.add(scoreLabel);
+        gameInfoPanel.add(scoreLabel, gbc);
+        gbc.gridy++;
+        nextTetrominoLabel = new JLabel("Next Tetromino:");
+        gameInfoPanel.add(nextTetrominoLabel, gbc);
+        add(gameInfoPanel, BorderLayout.WEST);
+
+        // Add status panel at the top for music and sound status
+        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel musicStatusLabel = new JLabel("Music: OFF");
+        JLabel soundStatusLabel = new JLabel("Sound: OFF");
+        statusPanel.add(musicStatusLabel);
+        statusPanel.add(soundStatusLabel);
         add(statusPanel, BorderLayout.NORTH);
 
         // Add end game button at the bottom
@@ -80,6 +113,10 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         endGameButton.addActionListener(e -> stopGame());
         buttonPanel.add(endGameButton);
         add(buttonPanel, BorderLayout.SOUTH);
+
+        // Dynamically adjust the panel sizes based on their contents
+        revalidate();
+        repaint();
 
         timer.start();
     }
@@ -139,6 +176,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
                 gameBoard.placeTetromino(tetromino);
                 int cleared = gameBoard.clearLines(); // Update rows cleared after placing
                 rowsCleared += cleared;
+                linesClearedLabel.setText("Line Erased: " + rowsCleared);
                 updateScore(cleared); // Update the score based on rows cleared
                 updateLevel(); // Check if level needs to be updated
                 if (gameBoard.isGameOver()) {
@@ -159,7 +197,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         // Increase level every 10 rows cleared
         if (rowsCleared >= currentLevel * 10) {
             currentLevel++;
-            levelLabel.setText("Level: " + currentLevel);
+            levelLabel.setText("Current Level: " + currentLevel);
 
             // Decrease the timer delay to make the game harder
             int newDelay = Math.max(GameConfig.TIMER_DELAY - (currentLevel * 50), 100);
