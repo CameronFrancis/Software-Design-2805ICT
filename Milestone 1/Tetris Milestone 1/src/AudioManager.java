@@ -10,27 +10,31 @@ public class AudioManager {
     private static Clip backgroundClip;
     private static boolean soundEffectsEnabled = true;
 
+    // Play Background Music (WAV format)
     public static void playBackgroundMusic() {
         try {
             if (backgroundClip != null && backgroundClip.isRunning()) {
                 backgroundClip.stop();
             }
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("resources/background.mp3"));
+            // Use the converted WAV file
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(AudioManager.class.getResourceAsStream("/resources/background.wav"));
             backgroundClip = AudioSystem.getClip();
             backgroundClip.open(audioInputStream);
-            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY);
+            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY); // Loop the music
             backgroundClip.start();
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
     }
 
+    // Stop Background Music
     public static void stopBackgroundMusic() {
         if (backgroundClip != null && backgroundClip.isRunning()) {
             backgroundClip.stop();
         }
     }
 
+    // Play sound effect (WAV format)
     public static void playSoundEffect(String filePath) {
         if (soundEffectsEnabled) {
             try {
@@ -44,10 +48,12 @@ public class AudioManager {
         }
     }
 
+    // Enable sound effects
     public static void enableSoundEffects() {
         soundEffectsEnabled = true;
     }
 
+    // Disable sound effects
     public static void disableSoundEffects() {
         soundEffectsEnabled = false;
     }
