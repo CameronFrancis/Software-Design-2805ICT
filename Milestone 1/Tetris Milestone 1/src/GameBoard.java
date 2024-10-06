@@ -5,11 +5,13 @@ public class GameBoard {
     private int cols;
     private Color[][] board;
     private Tetromino currentTetromino;
+    private int score;
 
     public GameBoard(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
         this.board = new Color[rows][cols];
+        this.score = 0;
     }
 
     public boolean canMove(Tetromino tetromino, int newX, int newY) {
@@ -41,7 +43,8 @@ public class GameBoard {
         }
     }
 
-    public void clearLines() {
+    public int clearLines() {
+        int linesCleared = 0;
         for (int i = 0; i < rows; i++) {
             boolean fullLine = true;
             for (int j = 0; j < cols; j++) {
@@ -52,8 +55,11 @@ public class GameBoard {
             }
             if (fullLine) {
                 removeLine(i);
+                linesCleared++;
             }
         }
+        updateScore(linesCleared);
+        return linesCleared;
     }
 
     private void removeLine(int line) {
@@ -62,6 +68,25 @@ public class GameBoard {
         }
         for (int j = 0; j < cols; j++) {
             board[0][j] = null;
+        }
+    }
+
+    private void updateScore(int linesCleared) {
+        switch (linesCleared) {
+            case 1:
+                score += 100;
+                break;
+            case 2:
+                score += 300;
+                break;
+            case 3:
+                score += 600;
+                break;
+            case 4:
+                score += 1000;
+                break;
+            default:
+                break;
         }
     }
 
@@ -84,5 +109,9 @@ public class GameBoard {
 
     public Color[][] getBoard() {
         return board;
+    }
+
+    public int getScore() {
+        return score;
     }
 }
