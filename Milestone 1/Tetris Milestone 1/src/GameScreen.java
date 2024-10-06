@@ -196,6 +196,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             }
         } else {
             gameBoard.setCurrentTetromino(generateNewTetromino());
+            AudioManager.playMoveSound(); // Play move sound
         }
     }
 
@@ -208,6 +209,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             // Decrease the timer delay to make the game harder
             int newDelay = Math.max(GameConfig.TIMER_DELAY - (currentLevel * 50), 100);
             timer.setDelay(newDelay);
+            AudioManager.playLevelUpSound(); // Play level up sound
         }
     }
 
@@ -291,9 +293,11 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         isPaused = !isPaused;
         if (isPaused) {
             timer.stop();
+            AudioManager.stopBackgroundMusic();; // Pause background music
             JOptionPane.showMessageDialog(this, "Game is paused, press P to continue.");
         } else {
             timer.start();
+            AudioManager.playBackgroundMusic(); // Resume background music
         }
     }
 
@@ -305,12 +309,14 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
 
     public void stopGame() {
         timer.stop();
+        AudioManager.stopBackgroundMusic(); // Stop background music
         int response = JOptionPane.showConfirmDialog(this, "Are you sure to stop the current game?", "Stop Game", JOptionPane.YES_NO_OPTION);
         if (response == JOptionPane.YES_OPTION) {
             frame.setContentPane(mainMenu);
             frame.revalidate();
         } else {
             timer.start();
+            AudioManager.playBackgroundMusic(); // Resume background music if not stopping
         }
     }
 }
