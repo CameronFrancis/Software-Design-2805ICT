@@ -1,3 +1,4 @@
+package Tetris;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -187,7 +188,9 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
                 updateLevel(); // Check if level needs to be updated
                 if (gameBoard.isGameOver()) {
                     timer.stop();
+                    AudioManager.playGameFinishSound();
                     JOptionPane.showMessageDialog(this, "Game Over");
+                    AudioManager.stopBackgroundMusic();
                     frame.setContentPane(mainMenu);
                     frame.revalidate();
                     return;
@@ -264,16 +267,19 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
                 case KeyEvent.VK_LEFT:
                     if (gameBoard.canMove(tetromino, tetromino.getX() - 1, tetromino.getY())) {
                         tetromino.moveLeft();
+                        AudioManager.playMoveSound();
                     }
                     break;
                 case KeyEvent.VK_RIGHT:
                     if (gameBoard.canMove(tetromino, tetromino.getX() + 1, tetromino.getY())) {
                         tetromino.moveRight();
+                        AudioManager.playMoveSound();
                     }
                     break;
                 case KeyEvent.VK_DOWN:
                     if (gameBoard.canMove(tetromino, tetromino.getX(), tetromino.getY() + 1)) {
                         tetromino.moveDown();
+                        AudioManager.playMoveSound();
                     }
                     break;
                 case KeyEvent.VK_UP:
@@ -282,6 +288,8 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
                         tetromino.rotate();
                         tetromino.rotate();
                         tetromino.rotate();
+                    } else {
+                        AudioManager.playMoveSound();
                     }
                     break;
             }
@@ -294,6 +302,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         if (isPaused) {
             timer.stop();
             AudioManager.stopBackgroundMusic();; // Pause background music
+            
             JOptionPane.showMessageDialog(this, "Game is paused, press P to continue.");
         } else {
             timer.start();

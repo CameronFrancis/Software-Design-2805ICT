@@ -1,7 +1,10 @@
+package Tetris;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import java.io.IOException;
+import java.net.URL;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
@@ -16,8 +19,13 @@ public class AudioManager {
                 if (backgroundClip != null && backgroundClip.isRunning()) {
                     backgroundClip.stop();
                 }
-                // Use the converted WAV file
-                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(AudioManager.class.getResourceAsStream(GameConfig.BACKGROUND_MUSIC_PATH));
+                // Use the converted WAV file and load via getResource()
+                URL audioFileUrl = AudioManager.class.getResource(GameConfig.BACKGROUND_MUSIC_PATH);
+                if (audioFileUrl == null) {
+                    System.err.println("Background music file not found: " + GameConfig.BACKGROUND_MUSIC_PATH);
+                    return;
+                }
+                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFileUrl);
                 backgroundClip = AudioSystem.getClip();
                 backgroundClip.open(audioInputStream);
                 backgroundClip.loop(Clip.LOOP_CONTINUOUSLY); // Loop the music
@@ -32,6 +40,7 @@ public class AudioManager {
     public static void stopBackgroundMusic() {
         if (backgroundClip != null && backgroundClip.isRunning()) {
             backgroundClip.stop();
+            backgroundClip.close(); // Release system resources
         }
     }
 
@@ -39,7 +48,12 @@ public class AudioManager {
     public static void playSoundEffect(String filePath) {
         if (GameConfig.SOUND_EFFECTS_ON && soundEffectsEnabled) {
             try {
-                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(AudioManager.class.getResourceAsStream(filePath));
+                URL audioFileUrl = AudioManager.class.getResource(filePath);
+                if (audioFileUrl == null) {
+                    System.err.println("Sound effect file not found: " + filePath);
+                    return;
+                }
+                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFileUrl);
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioInputStream);
                 clip.start();

@@ -1,3 +1,4 @@
+package Tetris;
 public class GameConfig {
     // Global config variables for gameboard size, used to size mainMenu window and gameboard.
     public static final int CELL_SIZE = 30;    // cell size
@@ -18,9 +19,10 @@ public class GameConfig {
     public static boolean EXTEND_MODE = false;
 
     // Audio File Paths
-    public static final String BACKGROUND_MUSIC_PATH = "resources/background.wav";
-    public static final String ERASE_LINE_SOUND_PATH = "resources/erase-line.wav";
-    public static final String GAME_FINISH_SOUND_PATH = "resources/game-finish.wav";
-    public static final String LEVEL_UP_SOUND_PATH = "resources/level-up.wav";
-    public static final String MOVE_TURN_SOUND_PATH = "resources/move-turn.wav";
+    public static final String BACKGROUND_MUSIC_PATH = "/resources/background.wav";
+    public static final String ERASE_LINE_SOUND_PATH = "/resources/erase-line.wav";
+    public static final String GAME_FINISH_SOUND_PATH = "/resources/game-finish.wav";
+    public static final String LEVEL_UP_SOUND_PATH = "/resources/level-up.wav";
+    public static final String MOVE_TURN_SOUND_PATH = "/resources/move-turn.wav";
+
 }
