@@ -1,4 +1,7 @@
 package Tetris;
+
+import java.io.File;
+
 public class GameConfig {
     // Global config variables for gameboard size, used to size mainMenu window and gameboard.
     public static final int CELL_SIZE = 30;    // cell size
@@ -9,7 +12,8 @@ public class GameConfig {
     public static final int TIMER_DELAY = 500; // Splash delay
     public static final String GAME_TITLE = "Enhanced Tetris"; // Game title
     public static final String AUTHOR = "Cameron Francis";
-    public static final String HIGH_SCORE_FILE_PATH = "/resources/high_scores.json";
+    public static final String HIGH_SCORE_FILE_PATH = System.getProperty("user.home") + File.separator + "high_scores.json";
+
     // Configurable Settings
     public static int INITIAL_LEVEL = 1;
     public static String PLAYER_TYPE = "Human";
