@@ -21,6 +21,7 @@ public class GameConfig {
     public static boolean SOUND_EFFECTS_ON = false;
     public static boolean AI_PLAY = false;
     public static boolean EXTEND_MODE = false;
+    public static final int AI_DELAY = 1000; // Delay for AI moves
 
     // Audio File Paths
     public static final String BACKGROUND_MUSIC_PATH = "/resources/background.wav";

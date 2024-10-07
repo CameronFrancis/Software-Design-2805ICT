@@ -36,6 +36,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
     private JLabel nextTetrominoLabel;
     private Tetromino nextTetromino;
     private JPanel nextTetrominoPanel;
+    private AIPlayer aiPlayer;
 
     public static final Color PURPLE = new Color(128, 0, 128);
 
@@ -48,6 +49,18 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         this.score = 0;
         this.isPaused = false;
         nextTetromino = generateNewTetromino();
+
+         // Setup AI if enabled
+         if (GameConfig.AI_PLAY) {
+            aiPlayer = new AIPlayer(gameBoard, this);
+            aiPlayer.start(); // Start AI player in a separate thread
+        } else {
+            // Setup human-controlled gameplay (timer, key listener, etc.)
+            this.timer = new Timer(GameConfig.TIMER_DELAY, this);
+            this.timer.start();
+            setFocusable(true);
+            addKeyListener(this);
+        }
 
         // Initialize current Tetromino with nextTetromino
         Tetromino currentTetromino = nextTetromino;
@@ -161,7 +174,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (!isPaused) {
+        if (!isPaused && !GameConfig.AI_PLAY) {
             moveTetrominoDown();
             repaint();
         }
@@ -277,7 +290,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         }
     }
 
-    private void updateLevel() {
+    protected void updateLevel() {
         // Increase level every 10 rows cleared
         if (rowsCleared >= currentLevel * 10) {
             currentLevel++;
@@ -290,7 +303,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         }
     }
 
-    private void updateScore(int rowsCleared) {
+    protected void updateScore(int rowsCleared) {
         // Update score based on rows cleared
         switch (rowsCleared) {
             case 1:
@@ -309,7 +322,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         scoreLabel.setText("Score: " + score);
     }
 
-    private Tetromino generateNewTetromino() {
+    protected Tetromino generateNewTetromino() {
         int[][][] shapes = {
             {{1, 1, 1, 1}},
             {{1, 1}, {1, 1}},
@@ -394,7 +407,12 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         // Confirm if the user really wants to exit the game
         int response = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit the game?", "Exit Game", JOptionPane.YES_NO_OPTION);
         if (response == JOptionPane.YES_OPTION) {
-            timer.stop();
+            if (GameConfig.AI_PLAY && aiPlayer != null) {
+                aiPlayer.stop();
+            }
+            if (timer != null) {
+                timer.stop();
+            }
             AudioManager.stopBackgroundMusic(); // Stop background music
     
             // Prompt the user to save their high score
@@ -405,7 +423,12 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             frame.revalidate();
         } else {
             // If the user doesn't want to exit, resume the game
-            timer.start();
+            if (GameConfig.AI_PLAY && aiPlayer != null) {
+                aiPlayer.start();
+            }
+            if (timer != null) {
+                timer.start();
+            }
             AudioManager.playBackgroundMusic(); // Resume background music
         }
     }
