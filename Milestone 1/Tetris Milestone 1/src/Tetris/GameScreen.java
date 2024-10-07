@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Date;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,6 +34,8 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
     private JLabel scoreLabel;
     private JLabel linesClearedLabel;
     private JLabel nextTetrominoLabel;
+    private Tetromino nextTetromino;
+    private JPanel nextTetrominoPanel;
 
     public static final Color PURPLE = new Color(128, 0, 128);
 
@@ -44,6 +47,15 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         this.rowsCleared = 0;
         this.score = 0;
         this.isPaused = false;
+        nextTetromino = generateNewTetromino();
+
+        // Initialize current Tetromino with nextTetromino
+        Tetromino currentTetromino = nextTetromino;
+        currentTetromino.setX(gameBoard.getBoard()[0].length / 2 - currentTetromino.getShape()[0].length / 2);
+        gameBoard.setCurrentTetromino(currentTetromino);
+
+        // Generate a new next Tetromino
+        nextTetromino = generateNewTetromino();
 
         // Set up the timer, starting with a default delay
         this.timer = new Timer(GameConfig.TIMER_DELAY, this);
@@ -106,6 +118,20 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         gbc.gridy++;
         nextTetrominoLabel = new JLabel("Next Tetromino:");
         gameInfoPanel.add(nextTetrominoLabel, gbc);
+        gbc.gridy++;
+
+        // Add next tetromino preview panel
+        nextTetrominoPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                drawNextTetromino(g);
+            }
+        };
+        nextTetrominoPanel.setPreferredSize(new Dimension(100, 100));
+        // nextTetrominoPanel.setBorder(BorderFactory.createTitledBorder("Next Tetromino"));
+        gameInfoPanel.add(nextTetrominoPanel, gbc);
+                
         add(gameInfoPanel, BorderLayout.WEST);
 
         // Add status panel at the top for music and sound status
@@ -122,6 +148,9 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         endGameButton.addActionListener(e -> stopGame());
         buttonPanel.add(endGameButton);
         add(buttonPanel, BorderLayout.SOUTH);
+        
+        // Initialize next tetromino
+        nextTetromino = generateNewTetromino();
 
         // Dynamically adjust the panel sizes based on their contents
         revalidate();
@@ -174,6 +203,32 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             }
         }
     }
+    
+    // Method to draw the next tetromino in the preview panel
+    private void drawNextTetromino(Graphics g) {
+        if (nextTetromino != null) {
+            int[][] shape = nextTetromino.getShape();
+            int cellSize = 20; // Size of each cell in the preview
+            int panelWidth = nextTetrominoPanel.getWidth();
+            int panelHeight = nextTetrominoPanel.getHeight();
+            int shapeWidth = shape[0].length * cellSize;
+            int shapeHeight = shape.length * cellSize;
+            int offsetX = (panelWidth - shapeWidth) / 2;
+            int offsetY = (panelHeight - shapeHeight) / 2;
+    
+            g.setColor(nextTetromino.getColor());
+            for (int i = 0; i < shape.length; i++) {
+                for (int j = 0; j < shape[i].length; j++) {
+                    if (shape[i][j] != 0) {
+                        g.fillRect(offsetX + j * cellSize, offsetY + i * cellSize, cellSize, cellSize);
+                        g.setColor(Color.BLACK);
+                        g.drawRect(offsetX + j * cellSize, offsetY + i * cellSize, cellSize, cellSize);
+                        g.setColor(nextTetromino.getColor());
+                    }
+                }
+            }
+        }
+    }
 
     private void moveTetrominoDown() {
         Tetromino tetromino = gameBoard.getCurrentTetromino();
@@ -201,11 +256,24 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
                     return;
                 }
                 
-                gameBoard.setCurrentTetromino(generateNewTetromino());
+                // Set current Tetromino to nextTetromino
+                Tetromino newTetromino = nextTetromino;
+                newTetromino.setX(gameBoard.getBoard()[0].length / 2 - newTetromino.getShape()[0].length / 2);
+                gameBoard.setCurrentTetromino(newTetromino);
+
+                // Generate new next Tetromino
+                nextTetromino = generateNewTetromino();
+                nextTetrominoPanel.repaint(); // Update the preview panel
             }
         } else {
-            gameBoard.setCurrentTetromino(generateNewTetromino());
-            AudioManager.playMoveSound(); // Play move sound
+            // First time initialization
+            Tetromino newTetromino = nextTetromino;
+            newTetromino.setX(gameBoard.getBoard()[0].length / 2 - newTetromino.getShape()[0].length / 2);
+            gameBoard.setCurrentTetromino(newTetromino);
+    
+            // Generate new next Tetromino
+            nextTetromino = generateNewTetromino();
+            nextTetrominoPanel.repaint(); // Update the preview panel
         }
     }
 
@@ -258,7 +326,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
 
         int index = (int) (Math.random() * shapes.length);
         Tetromino tetromino = new Tetromino(shapes[index], colors[index]);
-        tetromino.setX(gameBoard.getBoard()[0].length / 2 - tetromino.getShape()[0].length / 2);
+        // tetromino.setX(gameBoard.getBoard()[0].length / 2 - tetromino.getShape()[0].length / 2);
         return tetromino;
     }
 
