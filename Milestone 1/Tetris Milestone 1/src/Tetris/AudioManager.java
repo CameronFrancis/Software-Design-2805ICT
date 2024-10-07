@@ -12,27 +12,29 @@ public class AudioManager {
     private static Clip backgroundClip;
     private static boolean soundEffectsEnabled = true;
 
-    // Play Background Music (WAV format)
+    // Play Background Music (WAV format) on a separate thread
     public static void playBackgroundMusic() {
         if (GameConfig.MUSIC_ON) {
-            try {
-                if (backgroundClip != null && backgroundClip.isRunning()) {
-                    backgroundClip.stop();
+            new Thread(() -> {
+                try {
+                    if (backgroundClip != null && backgroundClip.isRunning()) {
+                        backgroundClip.stop();
+                    }
+                    // Use the converted WAV file and load via getResource()
+                    URL audioFileUrl = AudioManager.class.getResource(GameConfig.BACKGROUND_MUSIC_PATH);
+                    if (audioFileUrl == null) {
+                        System.err.println("Background music file not found: " + GameConfig.BACKGROUND_MUSIC_PATH);
+                        return;
+                    }
+                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFileUrl);
+                    backgroundClip = AudioSystem.getClip();
+                    backgroundClip.open(audioInputStream);
+                    backgroundClip.loop(Clip.LOOP_CONTINUOUSLY); // Loop the music
+                    backgroundClip.start();
+                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+                    e.printStackTrace();
                 }
-                // Use the converted WAV file and load via getResource()
-                URL audioFileUrl = AudioManager.class.getResource(GameConfig.BACKGROUND_MUSIC_PATH);
-                if (audioFileUrl == null) {
-                    System.err.println("Background music file not found: " + GameConfig.BACKGROUND_MUSIC_PATH);
-                    return;
-                }
-                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFileUrl);
-                backgroundClip = AudioSystem.getClip();
-                backgroundClip.open(audioInputStream);
-                backgroundClip.loop(Clip.LOOP_CONTINUOUSLY); // Loop the music
-                backgroundClip.start();
-            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-                e.printStackTrace();
-            }
+            }).start(); // Start the thread
         }
     }
 
@@ -44,22 +46,24 @@ public class AudioManager {
         }
     }
 
-    // Play sound effect (WAV format)
+    // Play sound effect (WAV format) on a separate thread
     public static void playSoundEffect(String filePath) {
         if (GameConfig.SOUND_EFFECTS_ON && soundEffectsEnabled) {
-            try {
-                URL audioFileUrl = AudioManager.class.getResource(filePath);
-                if (audioFileUrl == null) {
-                    System.err.println("Sound effect file not found: " + filePath);
-                    return;
+            new Thread(() -> {
+                try {
+                    URL audioFileUrl = AudioManager.class.getResource(filePath);
+                    if (audioFileUrl == null) {
+                        System.err.println("Sound effect file not found: " + filePath);
+                        return;
+                    }
+                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFileUrl);
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioInputStream);
+                    clip.start();
+                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+                    e.printStackTrace();
                 }
-                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFileUrl);
-                Clip clip = AudioSystem.getClip();
-                clip.open(audioInputStream);
-                clip.start();
-            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-                e.printStackTrace();
-            }
+            }).start(); // Start the thread
         }
     }
 

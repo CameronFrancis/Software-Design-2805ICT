@@ -16,6 +16,8 @@ public class GameConfig {
 
     // Configurable Settings
     public static int INITIAL_LEVEL = 1;
+    public static String PLAYER1_TYPE = "Human";
+    public static String PLAYER2_TYPE = "Human";
     public static String PLAYER_TYPE = "Human";
     public static boolean MUSIC_ON = false;
     public static boolean SOUND_EFFECTS_ON = false;

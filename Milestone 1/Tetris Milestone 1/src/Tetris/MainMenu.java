@@ -62,11 +62,17 @@ public class MainMenu extends JPanel {
         playButton.addActionListener(e -> {
             AudioManager.playBackgroundMusic(); // Play background music when game starts
             AudioManager.enableSoundEffects(); // Enable sound effects when game starts
-            GameScreen gameScreen = new GameScreen(frame, MainMenu.this);
+
+            if (GameConfig.EXTEND_MODE) {
+                MultiPlayerGameScreen multiPlayerGameScreen = new MultiPlayerGameScreen(frame, MainMenu.this);
+                frame.setContentPane(multiPlayerGameScreen);
+            } else {
+                GameScreen gameScreen = new GameScreen(frame, MainMenu.this, GameConfig.PLAYER_TYPE);
             frame.setContentPane(gameScreen);
+            }
             frame.pack();
             frame.revalidate();
-            gameScreen.requestFocusInWindow();
+            frame.setLocationRelativeTo(null);
         });
 
         configButton.addActionListener(new ActionListener() {

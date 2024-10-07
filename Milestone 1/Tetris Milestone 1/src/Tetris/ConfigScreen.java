@@ -1,8 +1,8 @@
 package Tetris;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 public class ConfigScreen extends JPanel {
     private JFrame frame;
@@ -11,6 +11,7 @@ public class ConfigScreen extends JPanel {
     public ConfigScreen(JFrame frame, MainMenu mainMenu) {
         this.frame = frame;
         this.mainMenu = mainMenu;
+
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
@@ -64,9 +65,19 @@ public class ConfigScreen extends JPanel {
         gbc.gridy = 6; // Move to the next row
         add(gameLevelSlider, gbc);
 
+        // Extend Mode On/Off Checkbox and Label
+        JCheckBox extendModeCheckbox = new JCheckBox("Extend Mode (On/Off):", GameConfig.EXTEND_MODE);
+        JLabel extendModeLabel = new JLabel(GameConfig.EXTEND_MODE ? "On" : "Off");
+        gbc.gridy = 7;
+        gbc.gridx = 0;
+        gbc.gridwidth = 1;
+        add(extendModeCheckbox, gbc);
+        gbc.gridx = 1;
+        add(extendModeLabel, gbc);
+
         // Player Type Dropdown
         JLabel playerTypeLabel = new JLabel("Player Type:");
-        gbc.gridy = 7;
+        gbc.gridy = 8;
         gbc.gridx = 0;
         gbc.gridwidth = 1;
         add(playerTypeLabel, gbc);
@@ -76,6 +87,50 @@ public class ConfigScreen extends JPanel {
         playerTypeDropdown.setSelectedItem(GameConfig.PLAYER_TYPE);
         gbc.gridx = 1;
         add(playerTypeDropdown, gbc);
+
+        // Player 1 Type Dropdown
+        JLabel player1TypeLabel = new JLabel("Player 1 Type:");
+        gbc.gridy = 9;
+        gbc.gridx = 0;
+        gbc.gridwidth = 1;
+        add(player1TypeLabel, gbc);
+
+        JComboBox<String> player1TypeDropdown = new JComboBox<>(playerTypes);
+        player1TypeDropdown.setSelectedItem(GameConfig.PLAYER1_TYPE);
+        gbc.gridx = 1;
+        add(player1TypeDropdown, gbc);
+
+        // Player 2 Type Dropdown
+        JLabel player2TypeLabel = new JLabel("Player 2 Type:");
+        gbc.gridy = 10;
+        gbc.gridx = 0;
+        add(player2TypeLabel, gbc);
+
+        JComboBox<String> player2TypeDropdown = new JComboBox<>(playerTypes);
+        player2TypeDropdown.setSelectedItem(GameConfig.PLAYER2_TYPE);
+        gbc.gridx = 1;
+        add(player2TypeDropdown, gbc);
+
+        // Disable Player 1 and Player 2 Type Dropdowns if Extended Mode is off
+        player1TypeDropdown.setEnabled(GameConfig.EXTEND_MODE);
+        player2TypeDropdown.setEnabled(GameConfig.EXTEND_MODE);
+
+        // Listener for Extend Mode Checkbox
+        extendModeCheckbox.addActionListener(e -> {
+            if (extendModeCheckbox.isSelected()) {
+                extendModeLabel.setText("On");
+                GameConfig.EXTEND_MODE = true;
+                player1TypeDropdown.setEnabled(true);
+                player2TypeDropdown.setEnabled(true);
+                playerTypeDropdown.setEnabled(false);
+            } else {
+                extendModeLabel.setText("Off");
+                GameConfig.EXTEND_MODE = false;
+                player1TypeDropdown.setEnabled(false);
+                player2TypeDropdown.setEnabled(false);
+                playerTypeDropdown.setEnabled(true);
+            }
+        });
 
         // Music On/Off Checkbox and Label
         JCheckBox musicCheckbox = new JCheckBox("Music (On/Off):", GameConfig.MUSIC_ON);
@@ -91,7 +146,7 @@ public class ConfigScreen extends JPanel {
                 GameConfig.MUSIC_ON = false;
             }
         });
-        gbc.gridy = 8;
+        gbc.gridy = 11;
         gbc.gridwidth = 1;
         gbc.gridx = 0;
         add(musicCheckbox, gbc);
@@ -112,52 +167,16 @@ public class ConfigScreen extends JPanel {
                 GameConfig.SOUND_EFFECTS_ON = false;
             }
         });
-        gbc.gridy = 9;
+        gbc.gridy = 12;
         gbc.gridx = 0;
         add(soundEffectCheckbox, gbc);
         gbc.gridx = 1;
         add(soundEffectLabel, gbc);
 
-        // AI Play On/Off Checkbox and Label
-        JCheckBox aiPlayCheckbox = new JCheckBox("AI Play (On/Off):", GameConfig.AI_PLAY);
-        JLabel aiPlayLabel = new JLabel(GameConfig.AI_PLAY ? "On" : "Off");
-        aiPlayCheckbox.addActionListener(e -> {
-            if (aiPlayCheckbox.isSelected()) {
-                aiPlayLabel.setText("On");
-                GameConfig.AI_PLAY = true;
-            } else {
-                aiPlayLabel.setText("Off");
-                GameConfig.AI_PLAY = false;
-            }
-        });
-        gbc.gridy = 10;
-        gbc.gridx = 0;
-        add(aiPlayCheckbox, gbc);
-        gbc.gridx = 1;
-        add(aiPlayLabel, gbc);
-
-        // Extend Mode On/Off Checkbox and Label
-        JCheckBox extendModeCheckbox = new JCheckBox("Extend Mode (On/Off):", GameConfig.EXTEND_MODE);
-        JLabel extendModeLabel = new JLabel(GameConfig.EXTEND_MODE ? "On" : "Off");
-        extendModeCheckbox.addActionListener(e -> {
-            if (extendModeCheckbox.isSelected()) {
-                extendModeLabel.setText("On");
-                GameConfig.EXTEND_MODE = true;
-            } else {
-                extendModeLabel.setText("Off");
-                GameConfig.EXTEND_MODE = false;
-            }
-        });
-        gbc.gridy = 11;
-        gbc.gridx = 0;
-        add(extendModeCheckbox, gbc);
-        gbc.gridx = 1;
-        add(extendModeLabel, gbc);
-
         // Back Button to return to Main Menu
         JButton backButton = new JButton("Back");
         gbc.gridx = 0;
-        gbc.gridy = 12;
+        gbc.gridy = 13;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         add(backButton, gbc);
@@ -167,8 +186,17 @@ public class ConfigScreen extends JPanel {
             GameConfig.BOARD_WIDTH = fieldWidthSlider.getValue();
             GameConfig.BOARD_HEIGHT = fieldHeightSlider.getValue();
             GameConfig.INITIAL_LEVEL = gameLevelSlider.getValue();
-            System.out.println("Initial level set to: " + GameConfig.INITIAL_LEVEL);
-            GameConfig.PLAYER_TYPE = (String) playerTypeDropdown.getSelectedItem();
+            GameConfig.MUSIC_ON = musicCheckbox.isSelected();
+            GameConfig.SOUND_EFFECTS_ON = soundEffectCheckbox.isSelected();
+            GameConfig.EXTEND_MODE = extendModeCheckbox.isSelected();
+
+            if (GameConfig.EXTEND_MODE) {
+                GameConfig.PLAYER1_TYPE = (String) player1TypeDropdown.getSelectedItem();
+                GameConfig.PLAYER2_TYPE = (String) player2TypeDropdown.getSelectedItem();
+            } else {
+                GameConfig.PLAYER_TYPE = (String) playerTypeDropdown.getSelectedItem();
+            }
+
             frame.setContentPane(mainMenu);
             frame.revalidate();
             frame.pack();
@@ -177,7 +205,7 @@ public class ConfigScreen extends JPanel {
         // Author Label
         JLabel authorLabel = new JLabel(GameConfig.AUTHOR, JLabel.CENTER);
         authorLabel.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
-        gbc.gridy = 13;
+        gbc.gridy = 14;
         gbc.gridwidth = 2;
         add(authorLabel, gbc);
     }
