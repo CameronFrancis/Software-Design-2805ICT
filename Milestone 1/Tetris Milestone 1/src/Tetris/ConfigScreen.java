@@ -167,6 +167,7 @@ public class ConfigScreen extends JPanel {
             GameConfig.BOARD_WIDTH = fieldWidthSlider.getValue();
             GameConfig.BOARD_HEIGHT = fieldHeightSlider.getValue();
             GameConfig.INITIAL_LEVEL = gameLevelSlider.getValue();
+            System.out.println("Initial level set to: " + GameConfig.INITIAL_LEVEL);
             GameConfig.PLAYER_TYPE = (String) playerTypeDropdown.getSelectedItem();
             frame.setContentPane(mainMenu);
             frame.revalidate();

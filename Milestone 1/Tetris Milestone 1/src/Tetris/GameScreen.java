@@ -23,40 +23,54 @@ public class GameScreen extends JPanel implements ActionListener {
     private AIPlayer aiPlayer;
     private boolean gameOver = false;
     public static final Color PURPLE = new Color(128, 0, 128);
+    private JButton endGameButton; // Declared at the class level
 
     public GameScreen(JFrame frame, MainMenu mainMenu) {
         this.frame = frame;
         this.mainMenu = mainMenu;
         this.gameBoard = new GameBoard(GameConfig.BOARD_HEIGHT, GameConfig.BOARD_WIDTH);
-        this.currentLevel = 1;
+        this.currentLevel = GameConfig.INITIAL_LEVEL;
         this.rowsCleared = 0;
         this.score = 0;
         this.isPaused = false;
+
+        // Generate the first nextTetromino
+        nextTetromino = generateNewTetromino();
+
+        // Initialize current Tetromino with nextTetromino
+        Tetromino currentTetromino = nextTetromino;
+        currentTetromino.setX(gameBoard.getBoard()[0].length / 2 - currentTetromino.getShape()[0].length / 2);
+        currentTetromino.setY(0);
+        gameBoard.setCurrentTetromino(currentTetromino);
+
+        // Generate a new nextTetromino for the next piece
         nextTetromino = generateNewTetromino();
 
         // Set up the timer, starting with a default delay
         this.timer = new Timer(GameConfig.TIMER_DELAY, this);
 
-        // Initialize current Tetromino with nextTetromino
-        Tetromino currentTetromino = nextTetromino;
-        currentTetromino.setX(gameBoard.getBoard()[0].length / 2 - currentTetromino.getShape()[0].length / 2);
-        gameBoard.setCurrentTetromino(currentTetromino);
+        // Set the timer delay based on the initial level
+        int initialDelay = Math.max(GameConfig.TIMER_DELAY - ((currentLevel - 1) * 50), 100);
+        timer.setDelay(initialDelay);
+        System.out.println("Initial Level: " + currentLevel + ", Initial Timer Delay: " + initialDelay);
+
+        // Start the timer for both human and AI gameplay
+        this.timer.start();
 
         // Setup AI if enabled
         if ("AI".equals(GameConfig.PLAYER_TYPE)) {
             aiPlayer = new AIPlayer(gameBoard, this);
             aiPlayer.start();
-        } else {
-            // Start the timer for human-controlled gameplay
-            this.timer.start();
         }
 
         setLayout(new BorderLayout());
+
         // Set the preferred size of the game screen
         setPreferredSize(new Dimension(
                 GameConfig.BOARD_WIDTH * GameConfig.CELL_SIZE + 300, // Additional space for info panel
                 GameConfig.BOARD_HEIGHT * GameConfig.CELL_SIZE + 100 // Additional space for button panel
         ));
+
         setFocusable(true);
         requestFocusInWindow(); // Ensure the GameScreen gains focus
 
@@ -89,6 +103,7 @@ public class GameScreen extends JPanel implements ActionListener {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.gridx = 0;
         gbc.gridy = 0;
+
         // Add game info labels to the info panel
         gameInfoPanel.add(new JLabel("Game Info (Player 1)"), gbc);
         gbc.gridy++;
@@ -108,6 +123,7 @@ public class GameScreen extends JPanel implements ActionListener {
         nextTetrominoLabel = new JLabel("Next Tetromino:");
         gameInfoPanel.add(nextTetrominoLabel, gbc);
         gbc.gridy++;
+
         // Add next tetromino preview panel
         nextTetrominoPanel = new JPanel() {
             @Override
@@ -120,6 +136,7 @@ public class GameScreen extends JPanel implements ActionListener {
         gameInfoPanel.add(nextTetrominoPanel, gbc);
 
         add(gameInfoPanel, BorderLayout.WEST);
+
         // Add status panel at the top for music and sound status
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel musicStatusLabel = new JLabel("Music: " + (GameConfig.MUSIC_ON ? "ON" : "OFF"));
@@ -127,12 +144,14 @@ public class GameScreen extends JPanel implements ActionListener {
         statusPanel.add(musicStatusLabel);
         statusPanel.add(soundStatusLabel);
         add(statusPanel, BorderLayout.NORTH);
+
         // Add end game button at the bottom
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton endGameButton = new JButton("End Game");
+        endGameButton = new JButton("End Game");
         endGameButton.addActionListener(e -> stopGame());
         buttonPanel.add(endGameButton);
         add(buttonPanel, BorderLayout.SOUTH);
+
         // Dynamically adjust the panel sizes based on their contents
         revalidate();
         repaint();
@@ -237,16 +256,19 @@ public class GameScreen extends JPanel implements ActionListener {
                 tetromino.moveDown();
             } else {
                 gameBoard.placeTetromino(tetromino);
-                int cleared = gameBoard.clearLines(); // Update rows cleared after placing
+                int cleared = gameBoard.clearLines(); // Number of lines cleared this turn
                 rowsCleared += cleared;
                 linesClearedLabel.setText("Line Erased: " + rowsCleared);
-                updateScore(cleared); // Update the score based on rows cleared
-                updateLevel(); // Check if level needs to be updated
+                updateScore(cleared);
+                updateLevel();
                 if (gameBoard.isGameOver()) {
                     gameOver = true;
                     timer.stop();
                     AudioManager.playGameFinishSound();
                     JOptionPane.showMessageDialog(this, "Game Over");
+
+                    // Disable the "End Game" button
+                    endGameButton.setEnabled(false);
 
                     // Stop the AI player if it's running
                     if (aiPlayer != null) {
@@ -259,37 +281,64 @@ public class GameScreen extends JPanel implements ActionListener {
                     AudioManager.stopBackgroundMusic();
                     frame.setContentPane(mainMenu);
                     frame.revalidate();
+
+                    // Set the panel to be non-focusable
+                    setFocusable(false);
+
                     return;
                 }
-
                 // Set current Tetromino to nextTetromino
                 Tetromino newTetromino = nextTetromino;
                 newTetromino.setX(gameBoard.getBoard()[0].length / 2 - newTetromino.getShape()[0].length / 2);
+                newTetromino.setY(0); // Ensure the new tetromino starts at the top
+
+                // Check if the new tetromino can be placed; if not, game over
+                if (!gameBoard.canMove(newTetromino, newTetromino.getX(), newTetromino.getY())) {
+                    gameOver = true;
+                    timer.stop();
+                    AudioManager.playGameFinishSound();
+                    JOptionPane.showMessageDialog(this, "Game Over");
+
+                    // Disable the "End Game" button
+                    endGameButton.setEnabled(false);
+
+                    // Stop the AI player if it's running
+                    if (aiPlayer != null) {
+                        aiPlayer.stop();
+                    }
+
+                    // Prompt to save high score
+                    promptToSaveHighScore();
+
+                    AudioManager.stopBackgroundMusic();
+                    frame.setContentPane(mainMenu);
+                    frame.revalidate();
+
+                    // Set the panel to be non-focusable
+                    setFocusable(false);
+
+                    return;
+                }
+
+                // If valid, set the new tetromino
                 gameBoard.setCurrentTetromino(newTetromino);
+
                 // Generate new next Tetromino
                 nextTetromino = generateNewTetromino();
                 nextTetrominoPanel.repaint(); // Update the preview panel
             }
-        } else {
-            // First time initialization
-            Tetromino newTetromino = nextTetromino;
-            newTetromino.setX(gameBoard.getBoard()[0].length / 2 - newTetromino.getShape()[0].length / 2);
-            gameBoard.setCurrentTetromino(newTetromino);
-
-            // Generate new next Tetromino
-            nextTetromino = generateNewTetromino();
-            nextTetrominoPanel.repaint(); // Update the preview panel
         }
     }
 
     protected void updateLevel() {
-        // Increase level every 10 rows cleared
-        if (rowsCleared >= currentLevel * 10) {
-            currentLevel++;
+        int newLevel = GameConfig.INITIAL_LEVEL + (rowsCleared / 10);
+        if (newLevel != currentLevel) {
+            currentLevel = newLevel;
             levelLabel.setText("Current Level: " + currentLevel);
             // Decrease the timer delay to make the game harder
-            int newDelay = Math.max(GameConfig.TIMER_DELAY - (currentLevel * 50), 100);
+            int newDelay = Math.max(GameConfig.TIMER_DELAY - ((currentLevel - 1) * 50), 100);
             timer.setDelay(newDelay);
+            System.out.println("Level Up! New Level: " + currentLevel + ", New Timer Delay: " + newDelay);
             AudioManager.playLevelUpSound(); // Play level up sound
         }
     }
@@ -339,7 +388,6 @@ public class GameScreen extends JPanel implements ActionListener {
                 aiPlayer.pause();
             }
             AudioManager.stopBackgroundMusic(); // Pause background music
-
             JOptionPane.showMessageDialog(this, "Game is paused, press P to continue.");
         } else {
             timer.start();
@@ -353,6 +401,11 @@ public class GameScreen extends JPanel implements ActionListener {
     }
 
     public void stopGame() {
+        if (gameOver) {
+            // The game is already over; no need to show the confirmation dialog
+            return;
+        }
+
         // Pause the game before showing the confirmation dialog
         timer.stop();
         if (aiPlayer != null) {
@@ -362,17 +415,14 @@ public class GameScreen extends JPanel implements ActionListener {
 
         // Show the confirmation dialog
         int response = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit the game?", "Exit Game", JOptionPane.YES_NO_OPTION);
-
         if (response == JOptionPane.YES_OPTION) {
             gameOver = true; // Set the game over flag
             // Stop the AI player if it's running
             if (aiPlayer != null) {
                 aiPlayer.stop();
             }
-
             // Prompt to save high score
             promptToSaveHighScore();
-
             // Return to the main menu
             frame.setContentPane(mainMenu);
             frame.revalidate();
@@ -413,6 +463,7 @@ public class GameScreen extends JPanel implements ActionListener {
 
     // Move tetromino left
     public void moveTetrominoLeft() {
+        if (gameOver) return;
         Tetromino tetromino = gameBoard.getCurrentTetromino();
         if (tetromino != null && gameBoard.canMove(tetromino, tetromino.getX() - 1, tetromino.getY())) {
             tetromino.moveLeft();
@@ -423,6 +474,7 @@ public class GameScreen extends JPanel implements ActionListener {
 
     // Move tetromino right
     public void moveTetrominoRight() {
+        if (gameOver) return;
         Tetromino tetromino = gameBoard.getCurrentTetromino();
         if (tetromino != null && gameBoard.canMove(tetromino, tetromino.getX() + 1, tetromino.getY())) {
             tetromino.moveRight();
@@ -433,6 +485,7 @@ public class GameScreen extends JPanel implements ActionListener {
 
     // Rotate tetromino
     public void rotateTetromino() {
+        if (gameOver) return;
         Tetromino tetromino = gameBoard.getCurrentTetromino();
         if (tetromino != null) {
             tetromino.rotate();
@@ -448,6 +501,7 @@ public class GameScreen extends JPanel implements ActionListener {
 
     // Move tetromino down
     public void moveTetrominoDownStep() {
+        if (gameOver) return;
         Tetromino tetromino = gameBoard.getCurrentTetromino();
         if (tetromino != null && gameBoard.canMove(tetromino, tetromino.getX(), tetromino.getY() + 1)) {
             tetromino.moveDown();
@@ -457,6 +511,7 @@ public class GameScreen extends JPanel implements ActionListener {
 
     // Hard drop tetromino
     public void hardDropTetromino() {
+        if (gameOver) return;
         Tetromino tetromino = gameBoard.getCurrentTetromino();
         if (tetromino != null) {
             while (gameBoard.canMove(tetromino, tetromino.getX(), tetromino.getY() + 1)) {
