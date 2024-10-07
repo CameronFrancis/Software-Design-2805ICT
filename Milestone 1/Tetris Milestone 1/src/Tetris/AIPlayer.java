@@ -3,20 +3,24 @@ package Tetris;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.awt.Color;
-
 
 public class AIPlayer implements Runnable {
     private GameBoard gameBoard;
     private GameScreen gameScreen;
     private boolean isRunning;
     private Timer aiTimer;
+    private Queue<Runnable> actionQueue;
+    private Move currentMove;
 
     public AIPlayer(GameBoard gameBoard, GameScreen gameScreen) {
         this.gameBoard = gameBoard;
         this.gameScreen = gameScreen;
         this.isRunning = true;
+        this.actionQueue = new LinkedList<>();
     }
 
     // Start the AI player in a separate thread
@@ -27,108 +31,97 @@ public class AIPlayer implements Runnable {
 
     @Override
     public void run() {
-        aiTimer = new Timer(500, e -> makeMove()); // Faster AI actions
+        // Adjust the delay to control the AI's speed (e.g., 200 milliseconds)
+        aiTimer = new Timer(200, e -> makeMove());
         aiTimer.start();
     }
 
     private void makeMove() {
         if (!isRunning) return;
 
+        // If there are actions in the queue, execute them step by step
+        if (!actionQueue.isEmpty()) {
+            actionQueue.poll().run();
+            gameScreen.repaint();
+        } else {
+            // If the action queue is empty, plan the next move
+            planNextMove();
+        }
+    }
+
+    private void planNextMove() {
         Tetromino tetromino = gameBoard.getCurrentTetromino();
+
+        // If there's no current tetromino, initialize one
         if (tetromino == null) {
-            // Initialize the first Tetromino
             tetromino = gameScreen.getNextTetromino();
             tetromino.setX(gameBoard.getBoard()[0].length / 2 - tetromino.getShape()[0].length / 2);
             gameBoard.setCurrentTetromino(tetromino);
-
-            // Generate new next Tetromino
-            gameScreen.setNextTetromino(gameScreen.generateNewTetromino());
-            gameScreen.getNextTetrominoPanel().repaint();
-            return;
-        }
-
-        // If the AI has already decided on a move, execute it
-        if (executeMove(tetromino)) {
-            gameScreen.repaint();
-            return;
-        }
-
-        // Otherwise, calculate the best move
-        Move bestMove = calculateBestMove(tetromino, gameBoard);
-        if (bestMove != null) {
-            // Apply the best move
-            applyMove(tetromino, bestMove);
-
-            // After moving and rotating, perform a hard drop
-            hardDrop(tetromino);
-
-            // Place the Tetromino
-            gameBoard.placeTetromino(tetromino);
-            int cleared = gameBoard.clearLines();
-            gameScreen.updateScore(cleared);
-            gameScreen.updateLevel();
-
-            // Check if the game is over
-            if (gameBoard.isGameOver()) {
-                stop();
-                SwingUtilities.invokeLater(() -> gameScreen.stopGame());
-                return;
-            }
-
-            // Set the next Tetromino
-            Tetromino newTetromino = gameScreen.getNextTetromino();
-            newTetromino.setX(gameBoard.getBoard()[0].length / 2 - newTetromino.getShape()[0].length / 2);
-            gameBoard.setCurrentTetromino(newTetromino);
-
             // Generate new next Tetromino
             gameScreen.setNextTetromino(gameScreen.generateNewTetromino());
             gameScreen.getNextTetrominoPanel().repaint();
         }
 
-        gameScreen.repaint();
+        // Calculate the best move
+        currentMove = calculateBestMove(tetromino, gameBoard);
+
+        if (currentMove != null) {
+            // Populate the action queue with movements
+            enqueueActions(tetromino, currentMove);
+        } else {
+            // No valid move found, end the game
+            stop();
+            SwingUtilities.invokeLater(() -> gameScreen.stopGame());
+        }
     }
 
-    private boolean executeMove(Tetromino tetromino) {
-        // This method can be used to execute pre-planned moves step by step if needed
-        return false; // Not implemented in this simple AI
-    }
-
-    private void applyMove(Tetromino tetromino, Move move) {
-        // Rotate to the desired orientation
-        int rotationsNeeded = move.rotation - tetromino.getRotation();
-        if (rotationsNeeded < 0) rotationsNeeded += 4;
+    private void enqueueActions(Tetromino tetromino, Move move) {
+        // Calculate rotations needed
+        int rotationsNeeded = (move.rotation - tetromino.getRotation() + 4) % 4;
         for (int i = 0; i < rotationsNeeded; i++) {
-            tetromino.rotate();
-            if (!gameBoard.canMove(tetromino, tetromino.getX(), tetromino.getY())) {
-                // Rotate back if invalid
-                tetromino.rotate();
-                tetromino.rotate();
-                tetromino.rotate();
-            }
+            actionQueue.add(() -> gameScreen.rotateTetromino());
         }
 
-        // Move to the desired X position
+        // Calculate horizontal movements needed
         int deltaX = move.x - tetromino.getX();
-        while (deltaX != 0) {
-            if (deltaX > 0) {
-                if (gameBoard.canMove(tetromino, tetromino.getX() + 1, tetromino.getY())) {
-                    tetromino.moveRight();
-                }
-                deltaX--;
-            } else {
-                if (gameBoard.canMove(tetromino, tetromino.getX() - 1, tetromino.getY())) {
-                    tetromino.moveLeft();
-                }
-                deltaX++;
-            }
+        Runnable moveAction = deltaX > 0 ? () -> gameScreen.moveTetrominoRight() : () -> gameScreen.moveTetrominoLeft();
+        for (int i = 0; i < Math.abs(deltaX); i++) {
+            actionQueue.add(moveAction);
         }
+
+        // Add hard drop action
+        actionQueue.add(() -> {
+            gameScreen.hardDropTetromino();
+            // After hard drop, handle placement and prepare for the next tetromino
+            SwingUtilities.invokeLater(this::handleTetrominoPlacement);
+        });
     }
 
-    private void hardDrop(Tetromino tetromino) {
-        // Move the Tetromino down until it can't move further
-        while (gameBoard.canMove(tetromino, tetromino.getX(), tetromino.getY() + 1)) {
-            tetromino.moveDown();
+    private void handleTetrominoPlacement() {
+        // Place the Tetromino
+        gameBoard.placeTetromino(gameBoard.getCurrentTetromino());
+        int cleared = gameBoard.clearLines();
+        gameScreen.updateScore(cleared);
+        gameScreen.updateLevel();
+
+        // Check if the game is over
+        if (gameBoard.isGameOver()) {
+            stop();
+            SwingUtilities.invokeLater(() -> gameScreen.stopGame());
+            return;
         }
+
+        // Set the next Tetromino
+        Tetromino newTetromino = gameScreen.getNextTetromino();
+        newTetromino.setX(gameBoard.getBoard()[0].length / 2 - newTetromino.getShape()[0].length / 2);
+        gameBoard.setCurrentTetromino(newTetromino);
+
+        // Generate new next Tetromino
+        gameScreen.setNextTetromino(gameScreen.generateNewTetromino());
+        gameScreen.getNextTetrominoPanel().repaint();
+
+        // Plan the move for the new tetromino
+        planNextMove();
     }
 
     private Move calculateBestMove(Tetromino tetromino, GameBoard board) {
@@ -142,8 +135,11 @@ public class AIPlayer implements Runnable {
                 testTetromino.rotate();
             }
 
-            // Iterate over all possible positions
-            for (int x = -2; x < board.getBoard()[0].length + 2; x++) {
+            // Iterate over all possible horizontal positions
+            int minX = -testTetromino.getShape()[0].length;
+            int maxX = board.getBoard()[0].length;
+
+            for (int x = minX; x < maxX; x++) {
                 Tetromino movedTetromino = new Tetromino(testTetromino);
                 movedTetromino.setX(x);
                 movedTetromino.setY(0);
@@ -164,7 +160,6 @@ public class AIPlayer implements Runnable {
                 }
             }
         }
-
         return bestMove;
     }
 
@@ -181,7 +176,6 @@ public class AIPlayer implements Runnable {
         int bumpiness = getBumpiness(tempGameBoard);
 
         int score = (linesCleared * 1000) - (aggregateHeight * 5) - (holes * 100) - (bumpiness * 5);
-
         return score;
     }
 
@@ -246,6 +240,18 @@ public class AIPlayer implements Runnable {
             this.x = x;
             this.rotation = rotation % 4;
             this.score = score;
+        }
+    }
+    
+    public void pause() {
+        if (aiTimer != null) {
+            aiTimer.stop();
+        }
+    }
+
+    public void resume() {
+        if (aiTimer != null) {
+            aiTimer.start();
         }
     }
 }

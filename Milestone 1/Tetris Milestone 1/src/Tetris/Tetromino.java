@@ -1,11 +1,14 @@
 package Tetris;
 import java.awt.Color;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class Tetromino {
     private int[][] shape;
     private Color color;
     private int x, y;
     private int rotation; // Add this field to track rotation state
+    
 
     public Tetromino(int[][] shape, Color color) {
         this.shape = shape;
@@ -54,16 +57,16 @@ public class Tetromino {
     public void rotate() {
         int rows = shape.length;
         int cols = shape[0].length;
-        int[][] newShape = new int[cols][rows]; // Swap rows and columns for rotation
-
+        int[][] rotatedShape = new int[cols][rows];
+    
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                newShape[j][rows - 1 - i] = shape[i][j];
+                rotatedShape[j][rows - 1 - i] = shape[i][j];
             }
         }
-
-        shape = newShape;
-        rotation = (rotation + 1) % 4; // Update rotation state
+    
+        shape = rotatedShape;
+        rotation = (rotation + 1) % 4;
     }
 
     // Copy constructor
@@ -85,5 +88,20 @@ public class Tetromino {
 
     public int getRotation() {
         return rotation % 4;
+    }
+
+    public void rotateBack() {
+        int rows = shape.length;
+        int cols = shape[0].length;
+        int[][] rotatedShape = new int[cols][rows];
+    
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                rotatedShape[cols - 1 - j][i] = shape[i][j];
+            }
+        }
+    
+        shape = rotatedShape;
+        rotation = (rotation + 3) % 4; // Adjust rotation state
     }
 }
