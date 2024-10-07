@@ -15,6 +15,23 @@ public class GameBoard {
         this.score = 0;
     }
 
+    // New constructor that accepts a Color[][]
+    public GameBoard(Color[][] board) {
+        this.rows = board.length;
+        this.cols = board[0].length;
+        this.board = board;
+        this.score = 0;
+    }
+
+    public Color[][] cloneBoard() {
+        Color[][] clonedBoard = new Color[board.length][board[0].length];
+        for (int i = 0; i < board.length; i++) {
+            System.arraycopy(board[i], 0, clonedBoard[i], 0, board[i].length);
+        }
+        return clonedBoard;
+    }
+    
+
     public boolean canMove(Tetromino tetromino, int newX, int newY) {
         int[][] shape = tetromino.getShape();
         for (int i = 0; i < shape.length; i++) {

@@ -51,9 +51,9 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         nextTetromino = generateNewTetromino();
 
          // Setup AI if enabled
-         if (GameConfig.AI_PLAY) {
+         if (GameConfig.PLAYER_TYPE == "AI") {
             aiPlayer = new AIPlayer(gameBoard, this);
-            aiPlayer.start(); // Start AI player in a separate thread
+            aiPlayer.start();
         } else {
             // Setup human-controlled gameplay (timer, key listener, etc.)
             this.timer = new Timer(GameConfig.TIMER_DELAY, this);
@@ -260,6 +260,11 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
                     AudioManager.playGameFinishSound();
                     JOptionPane.showMessageDialog(this, "Game Over");
                 
+                    // Stop the AI player if it's running
+                    if (aiPlayer != null) {
+                        aiPlayer.stop();
+                    }
+                
                     // Prompt to save high score
                     promptToSaveHighScore();
                 
@@ -322,7 +327,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         scoreLabel.setText("Score: " + score);
     }
 
-    protected Tetromino generateNewTetromino() {
+    public Tetromino generateNewTetromino() {
         int[][][] shapes = {
             {{1, 1, 1, 1}},
             {{1, 1}, {1, 1}},
@@ -407,13 +412,13 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
         // Confirm if the user really wants to exit the game
         int response = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit the game?", "Exit Game", JOptionPane.YES_NO_OPTION);
         if (response == JOptionPane.YES_OPTION) {
-            if (GameConfig.AI_PLAY && aiPlayer != null) {
+            timer.stop();
+            AudioManager.stopBackgroundMusic(); // Stop background music
+    
+            // Stop the AI player if it's running
+            if (aiPlayer != null) {
                 aiPlayer.stop();
             }
-            if (timer != null) {
-                timer.stop();
-            }
-            AudioManager.stopBackgroundMusic(); // Stop background music
     
             // Prompt the user to save their high score
             promptToSaveHighScore();
@@ -423,12 +428,7 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             frame.revalidate();
         } else {
             // If the user doesn't want to exit, resume the game
-            if (GameConfig.AI_PLAY && aiPlayer != null) {
-                aiPlayer.start();
-            }
-            if (timer != null) {
-                timer.start();
-            }
+            timer.start();
             AudioManager.playBackgroundMusic(); // Resume background music
         }
     }
@@ -442,4 +442,19 @@ public class GameScreen extends JPanel implements KeyListener, ActionListener {
             JOptionPane.showMessageDialog(this, "Your score has been saved!");
         }
     }
+    public Tetromino getNextTetromino() {
+        return nextTetromino;
+    }
+    
+    public void setNextTetromino(Tetromino tetromino) {
+        this.nextTetromino = tetromino;
+    }
+
+    public JPanel getNextTetrominoPanel() {
+        return nextTetrominoPanel;
+    }
+
+    
+    
+    
 }
