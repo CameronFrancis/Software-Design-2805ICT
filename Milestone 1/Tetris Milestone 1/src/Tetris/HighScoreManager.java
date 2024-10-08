@@ -1,71 +1,78 @@
 package Tetris;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.*;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class HighScoreManager {
     private List<HighScore> highScores;
-    private static final String FILE_PATH = GameConfig.HIGH_SCORE_FILE_PATH;
+    private String filePath;
+    private static final String DEFAULT_FILE_PATH = GameConfig.HIGH_SCORE_FILE_PATH;
 
+    // Default constructor uses the default file path
     public HighScoreManager() {
+        this(DEFAULT_FILE_PATH);
+    }
+
+    // Constructor that accepts a file path for testing or custom files
+    public HighScoreManager(String filePath) {
+        this.filePath = filePath;
         this.highScores = new ArrayList<>();
         loadHighScores();
     }
 
-    // Method to add a new high score
+    // Add a new high score
     public void addHighScore(HighScore highScore) {
         highScores.add(highScore);
-        Collections.sort(highScores);
-        if (highScores.size() > 10) {
-            highScores = highScores.subList(0, 10); // Keep only top 10 scores
-        }
-        saveHighScores();
+        Collections.sort(highScores);  // Sort by score descending
+        saveHighScores();  // Save after adding
     }
 
-    // Method to retrieve the high scores
     public List<HighScore> getHighScores() {
         return highScores;
     }
 
-    // Load high scores from JSON file
-    private void loadHighScores() {
-        File file = new File(FILE_PATH);
+    // Clear the high scores
+    public void clearHighScores() {
+        highScores.clear();
+        saveHighScores();  // Save the empty list to the file
+    }
+
+    // Load the high scores from the file using Gson
+    public void loadHighScores() {
+        File file = new File(filePath);
         if (file.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length == 3) {
-                        String playerName = parts[0];
-                        int score = Integer.parseInt(parts[1]);
-                        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(parts[2]);
-                        highScores.add(new HighScore(playerName, score, date));
-                    }
+                Gson gson = new Gson();
+                Type highScoreListType = new TypeToken<List<HighScore>>(){}.getType();
+                highScores = gson.fromJson(reader, highScoreListType);  // Load the list from JSON
+                if (highScores == null) {
+                    highScores = new ArrayList<>();  // If the file is empty, initialize an empty list
                 }
-                Collections.sort(highScores);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.err.println("Error loading high scores: " + e.getMessage());
             }
+        } else {
+            highScores = new ArrayList<>();  // If no file exists, start with an empty list
         }
     }
 
-    // Save high scores to JSON file
-    public void saveHighScores() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
-            for (HighScore highScore : highScores) {
-                writer.write(highScore.getPlayerName() + "," + highScore.getScore() + "," + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(highScore.getDate()));
-                writer.newLine();
-            }
+    // Save the high scores to the file using Gson
+    private void saveHighScores() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            writer.write(gson.toJson(highScores));
         } catch (IOException e) {
             System.err.println("Error saving high scores: " + e.getMessage());
         }
     }
 
-    // Inner class to represent a High Score
+    // Inner class for HighScore objects
     public static class HighScore implements Comparable<HighScore> {
         private String playerName;
         private int score;
@@ -91,13 +98,8 @@ public class HighScoreManager {
 
         @Override
         public int compareTo(HighScore other) {
-            return Integer.compare(other.score, this.score); // Sort in descending order
-        }
-
-        @Override
-        public String toString() {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            return playerName + " - " + score + " points on " + dateFormat.format(date);
+            return Integer.compare(other.score, this.score);  // Sort by score descending
         }
     }
 }
+

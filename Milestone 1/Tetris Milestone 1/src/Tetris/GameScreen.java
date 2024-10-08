@@ -485,7 +485,6 @@ public class GameScreen extends JPanel implements ActionListener {
             HighScoreManager highScoreManager = new HighScoreManager();
             HighScoreManager.HighScore highScore = new HighScoreManager.HighScore(playerName, score, new Date());
             highScoreManager.addHighScore(highScore);
-            highScoreManager.saveHighScores();
             JOptionPane.showMessageDialog(this, "Your score has been saved!");
         }
     }
